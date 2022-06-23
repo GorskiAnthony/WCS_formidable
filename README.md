@@ -87,3 +87,78 @@ Nous allons tester si l'upload fonctionne avec `postman`.
 Mais pour le bien du test, il faut bien sûr l'activer.
 
 Notre `Backend` à l'air de bien fonctionner.
+
+### ./src/router/index.js
+
+```js
+const router = require("express").Router();
+const fileMiddleware = require("../middleware/fileMiddleware");
+
+router.post("/add", fileMiddleware, (req, res) => {
+  /**
+   * Ici, nous allons simplement ajouter un fichier dans le dossier uploads
+   * et retourner un message de succès.
+   *
+   * Dans la vrai vie, on va sauvegarder le nom du fichier dans la bdd.
+   * Le nom du fichier ce trouve ici : req.files.{file}.newFilename
+   *
+   * {file} est le nom qu'on lui donne dans le frontend, il peut avoir d'autre nom selon comment vous l'appelez.
+   */
+  res.status(200).json({
+    success: true,
+    message: `${req.files.file.newFilename} add to upload directory`,
+  });
+});
+
+module.exports = router;
+```
+
+### ./src/middleware/fileMiddleware.js
+
+```js
+// ./src/middleware/fileMiddleware.js
+const fs = require("fs");
+const UPLOADS = "./uploads";
+const formidable = require("formidable");
+
+const fileMiddleware = (req, res, next) => {
+  // create folder if not exist
+  if (!fs.existsSync(UPLOADS)) {
+    // create folder
+    fs.mkdirSync(UPLOADS);
+  }
+  // create form
+  const form = new formidable.IncomingForm({
+    uploadDir: UPLOADS,
+    keepExtensions: true,
+  });
+  // parse form
+  form.parse(req, (err, fields, files) => {
+    // check error
+    if (err) {
+      // return error
+      res.status(500).json({ validationErrors: [{ message: err.message }] });
+    } else {
+      // else add fields to req.body & files to req.files
+      req.body = fields;
+      req.files = files;
+      next();
+    }
+  });
+};
+
+module.exports = fileMiddleware;
+```
+
+### ./src/app.js
+
+```js
+// ./src/app.js
+// j'ajoute juste les cors avec le frontend comme origin
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+    })
+);
+
+```
