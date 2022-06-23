@@ -162,3 +162,87 @@ app.use(
 );
 
 ```
+
+## 🖥 Frontend
+
+Le frontend est pas mal avancé, mais pas fini. Nous allons du coup créer la logique pour l'upload.
+
+Sur le fichier `./src/components/Form.jsx` nous allons ajouter des `states` et utiliser notre `api`.
+
+```js
+// .src/components/Form.jsx
+/**
+ * ici, je créer un state pour mon file, et un state pour mon filename
+ */
+const [file, setFile] = useState(null);
+const [filename, setFilename] = useState("file not found");
+```
+
+Pourquoi faire ça ?
+
+Car nous allons garder notre ficher de coté pour l'envoyer sur notre `backend`, et le `filename` est le nom du fichier qui sera affiché sur mon `frontend`.
+
+Ensuite, nous allons faire une fonction pour récupérer le fichier.
+
+```js
+  const handleSaveImage = (e) => {
+    setFile(e.target.files[0]);
+    setFilename(e.target.files[0].name);
+};
+```
+
+Ensuite, on modifie le fichier `Form.jsx`.
+
+```js
+<div className="flex text-sm text-gray-600">
+  <label
+    htmlFor="file-upload"
+    className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500"
+  >
+    <span>Upload a file</span>
+    <input
+      id="file-upload"
+      name="file-upload"
+      type="file"
+      className="sr-only"
+      onChange={handleSaveImage}
+    />
+  </label>
+  <p className="pl-1">{filename}</p>
+</div>
+```
+
+Et pour finir, on va avoir l'élément le plus important : le submit ! 
+
+```js
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (file) {
+        // doc: https://developer.mozilla.org/fr/docs/Web/API/FormData
+        /**
+         * Ici, nous allons créer un `FormData` pour envoyer le fichier sur notre `backend`
+         */
+        const formData = new FormData();
+        //doc: https://developer.mozilla.org/fr/docs/Web/API/FormData/append
+        formData.append("file", file);
+
+        // api provient de ./src/services/api.js qui utilise axios
+        // Dont la baseUrl est définie vers notre backend..
+        api
+            .post("/files/add", formData)
+            .then((res) => {
+                console.log(res.data);
+                setFile(null);
+                setFilename("file not found");
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    } else {
+        alert("Please select a file");
+    }
+};
+```
+
+# Et voilà ! Le frontend est fini.

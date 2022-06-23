@@ -1,7 +1,38 @@
 import React, { useState } from "react";
+import api from "../services/api";
 import Layout from "./Layout";
 
 const Form = () => {
+  const [file, setFile] = useState(null);
+  const [filename, setFilename] = useState("file not found");
+
+  const handleSaveImage = (e) => {
+    setFile(e.target.files[0]);
+    setFilename(e.target.files[0].name);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      api
+        .post("/files/add", formData)
+        .then((res) => {
+          console.log(res.data);
+          setFile(null);
+          setFilename("file not found");
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      alert("Please select a file");
+    }
+  };
+
   return (
     <Layout>
       <div className="mt-10">
@@ -17,7 +48,7 @@ const Form = () => {
             </div>
           </div>
           <div className="mt-5 md:mt-0 md:col-span-2">
-            <form action="#" method="POST">
+            <form onSubmit={handleSubmit}>
               <div className="shadow sm:rounded-md sm:overflow-hidden">
                 <div className="px-4 py-5 bg-white space-y-6 sm:p-6">
                   <div>
@@ -51,9 +82,10 @@ const Form = () => {
                               name="file-upload"
                               type="file"
                               className="sr-only"
+                              onChange={handleSaveImage}
                             />
                           </label>
-                          <p className="pl-1">{"name"}</p>
+                          <p className="pl-1">{filename}</p>
                         </div>
                         <p className="text-xs text-gray-500">
                           PNG, JPG, GIF up to 10MB
