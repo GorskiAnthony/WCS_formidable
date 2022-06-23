@@ -19,6 +19,4 @@ Mais nous allons nous concentrer sur [formidable](https://www.npmjs.com/package/
 
 ## Formidable
 
-```shell
-npm install formidable
-```
+Il y a 3 branches, la branche du projet par défaut sera `crm`, ensuite la branche `backend` sera uniquement dédiée à la configuration de `express` & `formidable` et la branche `frontend` sera dédiée pour notre appel à l'api avec axios.
